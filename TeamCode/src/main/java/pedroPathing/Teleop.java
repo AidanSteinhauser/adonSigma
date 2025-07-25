@@ -29,7 +29,6 @@ public class Teleop extends OpMode {
     private double pivotValue = 1;
     private double clawValue = 0.55;
     private double driveSpeedDivisor = 0;
-
     private double nudgeDistance = 1.5;
 
 
@@ -53,6 +52,11 @@ public class Teleop extends OpMode {
 
         driveToBasket = follower.pathBuilder()
                 .addPath(new BezierCurve(new Point(follower.getPose()), new Point(subway),  new Point(basketTest)))
+                .setLinearHeadingInterpolation(follower.getPose().getHeading(), basketTest.getHeading())
+                .build();
+
+        driveToBasket = follower.pathBuilder()
+                .addPath(new BezierCurve(new Point(follower.getPose()), new Point(subway),  new Point(subway),  new Point(subway),  new Point(basketTest)))
                 .setLinearHeadingInterpolation(follower.getPose().getHeading(), basketTest.getHeading())
                 .build();
 
