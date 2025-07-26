@@ -1,5 +1,7 @@
 package pedroPathing;
 
+import static android.os.SystemClock.sleep;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
 import com.pedropathing.pathgen.BezierCurve;
@@ -47,16 +49,19 @@ public class PedroLevelOneNationalNightOut extends OpMode {
     }
     public void buildPaths() {
         pasta = follower.pathBuilder()
-                .addPath(new BezierCurve(new Point(startPose), new Point(controlPose1),  new Point(controlPose2),  new Point(controlPose3),  new Point(pizza)))
-                        .setLinearHeadingInterpolation(startPose.getHeading(),pizza.getHeading())
-                        .build();
+                .addPath(new BezierCurve(new Point(startPose), new Point(controlPose1), new Point(controlPose2), new Point(controlPose3), new Point(pizza)))
+                .setLinearHeadingInterpolation(startPose.getHeading(), pizza.getHeading())
+                .build();
     }
 
     /** This is the main loop of the opmode and runs continuously after play **/
     @Override
     public void loop() {
+        buildPaths();
+
         if (gamepad1.cross) {
-            follower.followPath(pasta, 1, true);
+            sleep(30);
+            follower.followPath(pasta, 0.5, true);
         }
 
 
