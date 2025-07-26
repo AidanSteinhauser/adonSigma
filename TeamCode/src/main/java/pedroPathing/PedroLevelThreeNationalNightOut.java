@@ -16,15 +16,15 @@ import pedroPathing.RandomClass;
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 
-@Autonomous(name = "PedroLevelTwoNationalNightOut", group = "Adon")
-public class PedroLevelTwoNationalNightOut extends OpMode {
+@Autonomous(name = "PedroLevelThreeNationalNightOut", group = "Adon")
+public class PedroLevelThreeNationalNightOut extends OpMode {
 
     private Follower follower;
     private final Pose startPose = new Pose(55.25, 17, Math.toRadians(90));
-    private final Pose pizza = new Pose(68.75, 60, Math.toRadians(0));
+    private final Pose puff = new Pose(50.5, 48, Math.toRadians(90));
+    private final Pose pizza = new Pose(59.25, 36, Math.toRadians(0));
 
-    private PathChain pathToPizza;
-
+    private PathChain pasta, veggiewrap;
     private Servo claw;
     private int pathState;
 
@@ -32,9 +32,15 @@ public class PedroLevelTwoNationalNightOut extends OpMode {
     private Timer opmodeTimer;
 
     public void buildPaths() {
-        pathToPizza = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(startPose), new Point(pizza)))
-                .setLinearHeadingInterpolation(startPose.getHeading(), pizza.getHeading())
+        pasta = follower.pathBuilder()
+                .addPath(new BezierLine(new Point(startPose), new Point(puff)))
+                .setLinearHeadingInterpolation(startPose.getHeading(), puff.getHeading())
+                .setPathEndTimeoutConstraint(400)
+                .build();
+
+        veggiewrap = follower.pathBuilder()
+                .addPath(new BezierLine(new Point(puff), new Point(pizza)))
+                .setLinearHeadingInterpolation(puff.getHeading(), pizza.getHeading())
                 .build();
     }
 
@@ -51,13 +57,23 @@ public class PedroLevelTwoNationalNightOut extends OpMode {
 
             case 1:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(0.2);
-                    follower.followPath(pathToPizza, true);
+                    follower.setMaxPower(0.5);
+                    follower.followPath(pasta, true);
                     setPathState(2);
                 }
                 break;
 
             case 2:
+                if (!follower.isBusy()) {
+                    follower.holdPoint(puff);
+                    claw.setPosition(0);
+                    sleep(800);
+                    follower.followPath(veggiewrap, true);
+                    setPathState(3);
+                }
+                break;
+
+            case 3:
                 if (!follower.isBusy()) {
                     follower.holdPoint(pizza);
                     claw.setPosition(1);

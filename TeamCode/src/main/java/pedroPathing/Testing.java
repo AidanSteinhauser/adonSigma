@@ -1,8 +1,9 @@
 package pedroPathing;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
+@Disabled
 @TeleOp(name = "Testing", group = "Adon")
 public class Testing extends OpMode {
 
