@@ -20,7 +20,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 
-@Disabled
+
 @TeleOp(name = "Teleop", group = "adon")
 public class Teleop extends OpMode {
     private Follower follower;
