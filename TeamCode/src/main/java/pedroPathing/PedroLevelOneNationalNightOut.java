@@ -26,6 +26,7 @@ public class PedroLevelOneNationalNightOut extends OpMode {
 
 
     private int pathState = 0;
+    double value = 0;
 
     private void setPathState(int newState) {
         pathState = newState;
@@ -50,7 +51,7 @@ public class PedroLevelOneNationalNightOut extends OpMode {
     public void buildPaths() {
         pasta = follower.pathBuilder()
                 .addPath(new BezierCurve(new Point(startPose), new Point(controlPose1), new Point(controlPose2), new Point(controlPose3), new Point(pizza)))
-                .setLinearHeadingInterpolation(startPose.getHeading(), pizza.getHeading())
+                .setTangentHeadingInterpolation()
                 .build();
     }
 
@@ -59,9 +60,10 @@ public class PedroLevelOneNationalNightOut extends OpMode {
     public void loop() {
         buildPaths();
 
-        if (gamepad1.cross) {
+        if (gamepad1.cross & value==0) {
             sleep(30);
-            follower.followPath(pasta, 0.5, true);
+            follower.followPath(pasta, 0.75, true);
+            value = 1;
         }
 
 

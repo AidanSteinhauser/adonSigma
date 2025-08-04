@@ -21,11 +21,11 @@ public class PedroLevelThreeNationalNightOut extends OpMode {
 
     private Follower follower;
     private final Pose startPose = new Pose(55.25, 17, Math.toRadians(90));
-    private final Pose puff = new Pose(50.5, 48, Math.toRadians(90));
-    private final Pose pizza = new Pose(59.25, 36, Math.toRadians(0));
+    private final Pose puff = new Pose(50.5, 48, Math.toRadians(180));
+    private final Pose pizza = new Pose(63, 36, Math.toRadians(0));
 
     private PathChain pasta, veggiewrap;
-    private Servo claw;
+    private Servo claw, pivot, turn;
     private int pathState;
 
     private Timer pathTimer;
@@ -57,7 +57,11 @@ public class PedroLevelThreeNationalNightOut extends OpMode {
 
             case 1:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(0.5);
+                    pivot.setPosition(0);
+                    turn.setPosition(0.5);
+                    claw.setPosition(1);
+                    sleep(400);
+                    follower.setMaxPower(0.75);
                     follower.followPath(pasta, true);
                     setPathState(2);
                 }
@@ -66,8 +70,11 @@ public class PedroLevelThreeNationalNightOut extends OpMode {
             case 2:
                 if (!follower.isBusy()) {
                     follower.holdPoint(puff);
+                    sleep(30);
+                    pivot.setPosition(0);
+                    sleep(400);
                     claw.setPosition(0);
-                    sleep(800);
+                    sleep(400);
                     follower.followPath(veggiewrap, true);
                     setPathState(3);
                 }
@@ -77,7 +84,7 @@ public class PedroLevelThreeNationalNightOut extends OpMode {
                 if (!follower.isBusy()) {
                     follower.holdPoint(pizza);
                     claw.setPosition(1);
-                    sleep(800);
+                    sleep(400);
                     setPathState(-1);
                 }
                 break;
@@ -91,6 +98,8 @@ public class PedroLevelThreeNationalNightOut extends OpMode {
         opmodeTimer.resetTimer();
 
         claw = hardwareMap.get(Servo.class, "claw");
+        pivot = hardwareMap.get(Servo.class, "pivot");
+        turn = hardwareMap.get(Servo.class, "pivot");
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
         follower.setStartingPose(startPose);
         buildPaths();

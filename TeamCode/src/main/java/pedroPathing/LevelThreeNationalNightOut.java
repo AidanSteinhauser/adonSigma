@@ -5,27 +5,30 @@ import com.pedropathing.localization.Pose;
 import com.pedropathing.pathgen.BezierLine;
 import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
-@TeleOp(name = "nationalNightOutRevised", group = "Adon")
-public class nationalNightOutRevised extends OpMode {
+
+@TeleOp(name = "LevelThreeNationalNightOut", group = "Adon")
+public class LevelThreeNationalNightOut extends OpMode {
     private Follower follower;
     private boolean inbounds = true;
-
-    private double x1=-30; //inches from origin
-    private double y1=-10; //inches from origin
-    private double x2=30; //inches from origin
-    private double y2=10; //inches from origin
+    boolean optionsWasPressed = false;
+    private double x1=-31.25; //inches from origin
+    private double y1=-5; //inches from origin
+    private double x2=31.75; //inches from origin
+    private double y2=67; //inches from origin
+    double servoPosition = 0;
     private boolean inboundsupwards = true;
     private boolean inboundsdownwards = true;
     private boolean inboundsleftwards = true;
     private boolean inboundsrightwards = true;
-    private final Pose startPose = new Pose(0,0,0);
+    private final Pose startPose = new Pose(0,0,Math.toRadians(0));
     private PathChain driveToGoalRight, driveToGoalLeft, driveToGoalUp, driveToGoalDown;
+    private Servo claw, pivot;
 
 
     private int pathState = 0;
@@ -39,6 +42,8 @@ public class nationalNightOutRevised extends OpMode {
     public void init() {
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
         follower.setStartingPose(startPose);
+        claw = hardwareMap.get(Servo.class, "claw");
+        pivot = hardwareMap.get(Servo.class, "pivot");
     }
 
     /** This method is called continuously after Init while waiting to be started. **/
@@ -49,6 +54,7 @@ public class nationalNightOutRevised extends OpMode {
     /** This method is called once at the start of the OpMode. **/
     @Override
     public void start() {
+        pivot.setPosition(0);
         follower.startTeleopDrive();
     }
     public void buildPaths() {
@@ -102,67 +108,87 @@ public class nationalNightOutRevised extends OpMode {
         switch (pathState) {
             case 0:
                 // Normal driving
-                follower.setTeleOpMovementVectors(-gamepad1.left_stick_y*0.4, -gamepad1.left_stick_x*0.4, -gamepad1.right_stick_x*0.4, true);
+                follower.setTeleOpMovementVectors(-gamepad1.left_stick_y*0.4,-gamepad1.left_stick_x*0.4, -gamepad1.right_stick_x*0.4, true);
 
-                // Boundary detection -> trigger corrections
-                if (!inboundsrightwards) {
-                    buildPaths();
-                    setPathState(1);
-                } else if (!inboundsupwards) {
-                    buildPaths();
-                    setPathState(2);
-                } else if (!inboundsleftwards) {
-                    buildPaths();
-                    setPathState(3);
-                } else if (!inboundsdownwards) {
-                    buildPaths();
-                    setPathState(4);
+
+
+                if (gamepad1.options && !optionsWasPressed) {
+                    if (servoPosition == 0) {
+                        servoPosition = 1;
+                    } else {
+                        servoPosition = 0;
+                    }
+                    optionsWasPressed = true;
+                } else if (!gamepad1.options) {
+                    optionsWasPressed = false;
                 }
-                break;
 
-            case 1:
-                follower.followPath(driveToGoalRight, 0.2, false);
-                setPathState(5);
-                break;
+                claw.setPosition(servoPosition);
 
-            case 2:
-                follower.followPath(driveToGoalUp, 0.2, false);
-                setPathState(5);
-                break;
-
-            case 3:
-                follower.followPath(driveToGoalLeft, 0.2, false);
-                setPathState(5);
-                break;
-
-            case 4:
-                follower.followPath(driveToGoalDown, 0.2, false);
-                setPathState(5);
-                break;
-
-            case 5:
-                if (!follower.isBusy()) {
-                    follower.startTeleopDrive();
-                    setPathState(0);
-                }
-                break;
+        // Boundary detection -> trigger corrections
+        if (!inboundsrightwards) {
+            buildPaths();
+            setPathState(1);
+        } else if (!inboundsupwards) {
+            buildPaths();
+            setPathState(2);
+        } else if (!inboundsleftwards) {
+            buildPaths();
+            setPathState(3);
+        } else if (!inboundsdownwards) {
+            buildPaths();
+            setPathState(4);
         }
+        break;
 
+        case 1:
+        follower.followPath(driveToGoalRight, 0.2, false);
+        setPathState(5);
+        break;
 
+        case 2:
+        follower.followPath(driveToGoalUp, 0.2, false);
+        setPathState(5);
+        break;
 
-        follower.update();
-        telemetry.addData("inboundsleftwards", inboundsleftwards);
-        telemetry.addData("inboundsrightwards", inboundsrightwards);
-        telemetry.addData("inboundsdownwards", inboundsdownwards);
-        telemetry.addData("inboundsupwards", inboundsupwards);
-        telemetry.addData("X", follower.getPose().getX());
-        telemetry.addData("Y", follower.getPose().getY());
-        telemetry.addData("Heading in Degrees", Math.toDegrees(follower.getPose().getHeading()));
-        telemetry.update();
+        case 3:
+        follower.followPath(driveToGoalLeft, 0.2, false);
+        setPathState(5);
+        break;
+
+        case 4:
+        follower.followPath(driveToGoalDown, 0.2, false);
+        setPathState(5);
+        break;
+
+        case 5:
+        if (!follower.isBusy()) {
+            follower.startTeleopDrive();
+            setPathState(0);
+        }
+        break;
     }
 
-    /** We do not use this because everything automatically should disable **/
-    @Override
-    public void stop() {
-    }
+
+
+       follower.update();
+       telemetry.addData("inboundsleftwards", inboundsleftwards);
+       telemetry.addData("inboundsrightwards", inboundsrightwards);
+       telemetry.addData("inboundsdownwards", inboundsdownwards);
+       telemetry.addData("inboundsupwards", inboundsupwards);
+       telemetry.addData("X", follower.getPose().getX());
+       telemetry.addData("Y", follower.getPose().getY());
+       telemetry.addData("Heading in Degrees", Math.toDegrees(follower.getPose().getHeading()));
+       telemetry.update();
 }
+
+/** We do not use this because everything automatically should disable **/
+@Override
+public void stop() {
+}
+}
+
+
+
+
+

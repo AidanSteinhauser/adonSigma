@@ -33,7 +33,7 @@ public class Teleop extends OpMode {
     private double nudgeDistance = 1.5;
 
 
-    private DcMotor slide = null;
+
     private Servo claw = null;
     private Servo pivot = null;
     private Servo turn = null;
@@ -67,12 +67,9 @@ public class Teleop extends OpMode {
     public void init() {
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
         follower.setStartingPose(autoEnd);
-        slide = hardwareMap.get(DcMotor.class, "slide");
         claw = hardwareMap.get(Servo.class, "claw");
         pivot = hardwareMap.get(Servo.class, "pivot");
         turn = hardwareMap.get(Servo.class, "turn");
-        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slide.setDirection(DcMotorSimple.Direction.REVERSE);
         buildPaths();
 
     }
@@ -118,8 +115,6 @@ public class Teleop extends OpMode {
         if (gamepad1.right_trigger > 0.2) {
             slideticks = 100;
             sleep(20);
-            slide.setTargetPosition((int) slideticks);
-            slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             pivotValue = 1;
             pivot.setPosition(1);
             sleep(200);
@@ -129,8 +124,6 @@ public class Teleop extends OpMode {
         if (gamepad1.left_trigger > 0.2) {
             slideticks = 100;
             sleep(20);
-            slide.setTargetPosition((int) slideticks);
-            slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             pivotValue = 1;
             pivot.setPosition(1);
             sleep(200);
@@ -240,14 +233,10 @@ public class Teleop extends OpMode {
             }
 
             turn.setPosition(turnValue);
-            slide.setPower(1);
-            slide.setTargetPosition((int) slideticks);
-            slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             telemetry.addData("pivot position", pivot.getPosition());
             telemetry.addData("claw position", claw.getPosition());
             telemetry.addData("turn var", turnValue);
             telemetry.addData("turn position", turn.getPosition());
-            telemetry.addData("slide ticks", slide.getCurrentPosition());
             telemetry.addData("X", follower.getPose().getX());
             telemetry.addData("Y", follower.getPose().getY());
             telemetry.addData("Heading in Degrees", Math.toDegrees(follower.getPose().getHeading()));

@@ -1,31 +1,36 @@
 package pedroPathing;
 
+import static android.os.SystemClock.sleep;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
 import com.pedropathing.pathgen.BezierLine;
 import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
-@TeleOp(name = "nationalNightOutRevised", group = "Adon")
-public class nationalNightOutRevised extends OpMode {
+
+@TeleOp(name = "LevelTwoNationalNightOut", group = "Adon")
+public class LevelTwoNationalNightOut extends OpMode {
     private Follower follower;
     private boolean inbounds = true;
 
-    private double x1=-30; //inches from origin
-    private double y1=-10; //inches from origin
-    private double x2=30; //inches from origin
-    private double y2=10; //inches from origin
+    private double x1=-31.25; //inches from origin
+    private double y1=-5; //inches from origin
+    private double x2=31.75; //inches from origin
+    private double y2=67; //inches from origin
+    double value = 0;
     private boolean inboundsupwards = true;
     private boolean inboundsdownwards = true;
     private boolean inboundsleftwards = true;
     private boolean inboundsrightwards = true;
-    private final Pose startPose = new Pose(0,0,0);
+    private final Pose startPose = new Pose(0,0,Math.toRadians(0));
     private PathChain driveToGoalRight, driveToGoalLeft, driveToGoalUp, driveToGoalDown;
+    private Servo claw, pivot, turn;
 
 
     private int pathState = 0;
@@ -39,6 +44,9 @@ public class nationalNightOutRevised extends OpMode {
     public void init() {
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
         follower.setStartingPose(startPose);
+        claw = hardwareMap.get(Servo.class, "claw");
+        pivot = hardwareMap.get(Servo.class, "pivot");
+        turn = hardwareMap.get(Servo.class, "turn");
     }
 
     /** This method is called continuously after Init while waiting to be started. **/
@@ -49,6 +57,9 @@ public class nationalNightOutRevised extends OpMode {
     /** This method is called once at the start of the OpMode. **/
     @Override
     public void start() {
+        pivot.setPosition(1);
+        turn.setPosition(0.5);
+        claw.setPosition(0);
         follower.startTeleopDrive();
     }
     public void buildPaths() {
@@ -90,19 +101,27 @@ public class nationalNightOutRevised extends OpMode {
     @Override
     public void loop() {
         buildPaths();
-        follower.setMaxPower(1);
-        follower.setTeleOpMovementVectors(-gamepad1.left_stick_y*0.4, -gamepad1.left_stick_x*0.4, -gamepad1.right_stick_x*0.4, true);
-
-        inboundsdownwards = follower.getPose().getX() >= y1;
-        inboundsupwards = follower.getPose().getX() <= y2;
-        inboundsrightwards = follower.getPose().getY() >= -x2;
-        inboundsleftwards = follower.getPose().getY() <= -x1;
+        if (value == 0) {
+            follower.setMaxPower(1);
+            follower.setTeleOpMovementVectors(-gamepad1.left_stick_y * 0.4, -gamepad1.left_stick_x * 0.4, -gamepad1.right_stick_x * 0.4, true);
+        }
+        inboundsdownwards = (follower.getPose().getX() >= y1);
+        inboundsupwards = (follower.getPose().getX() <= y2);
+        inboundsrightwards = (-follower.getPose().getY() <= x2);
+        inboundsleftwards = (-follower.getPose().getY() >= x1);
 
 
         switch (pathState) {
             case 0:
                 // Normal driving
-                follower.setTeleOpMovementVectors(-gamepad1.left_stick_y*0.4, -gamepad1.left_stick_x*0.4, -gamepad1.right_stick_x*0.4, true);
+                follower.setTeleOpMovementVectors(-gamepad1.left_stick_y*0.4,-gamepad1.left_stick_x*0.4, -gamepad1.right_stick_x*0.4, true);
+
+                if (gamepad1.options) {
+                    claw.setPosition(1);
+                    sleep(500);
+                    setPathState(-1);
+                    value = 1;
+                }
 
                 // Boundary detection -> trigger corrections
                 if (!inboundsrightwards) {
@@ -166,3 +185,7 @@ public class nationalNightOutRevised extends OpMode {
     public void stop() {
     }
 }
+
+
+
+

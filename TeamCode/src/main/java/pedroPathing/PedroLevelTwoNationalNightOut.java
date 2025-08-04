@@ -21,11 +21,11 @@ public class PedroLevelTwoNationalNightOut extends OpMode {
 
     private Follower follower;
     private final Pose startPose = new Pose(55.25, 17, Math.toRadians(90));
-    private final Pose pizza = new Pose(68.75, 60, Math.toRadians(0));
+    private final Pose pizza = new Pose(63, 59, Math.toRadians(0));
 
     private PathChain pathToPizza;
 
-    private Servo claw;
+    private Servo claw, pivot, turn;
     private int pathState;
 
     private Timer pathTimer;
@@ -35,6 +35,7 @@ public class PedroLevelTwoNationalNightOut extends OpMode {
         pathToPizza = follower.pathBuilder()
                 .addPath(new BezierLine(new Point(startPose), new Point(pizza)))
                 .setLinearHeadingInterpolation(startPose.getHeading(), pizza.getHeading())
+                .setPathEndTimeoutConstraint(200)
                 .build();
     }
 
@@ -51,8 +52,9 @@ public class PedroLevelTwoNationalNightOut extends OpMode {
 
             case 1:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(0.2);
+                    follower.setMaxPower(0.7);
                     follower.followPath(pathToPizza, true);
+                    sleep(500);
                     setPathState(2);
                 }
                 break;
@@ -60,6 +62,7 @@ public class PedroLevelTwoNationalNightOut extends OpMode {
             case 2:
                 if (!follower.isBusy()) {
                     follower.holdPoint(pizza);
+                    sleep(200);
                     claw.setPosition(1);
                     sleep(800);
                     setPathState(-1);
@@ -75,6 +78,8 @@ public class PedroLevelTwoNationalNightOut extends OpMode {
         opmodeTimer.resetTimer();
 
         claw = hardwareMap.get(Servo.class, "claw");
+        pivot = hardwareMap.get(Servo.class, "pivot");
+        turn = hardwareMap.get(Servo.class, "turn");
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
         follower.setStartingPose(startPose);
         buildPaths();
@@ -87,6 +92,9 @@ public class PedroLevelTwoNationalNightOut extends OpMode {
     @Override
     public void start() {
         opmodeTimer.resetTimer();
+        pivot.setPosition(1);
+        claw.setPosition(0);
+        turn.setPosition(0.5);
         setPathState(0);
     }
 
