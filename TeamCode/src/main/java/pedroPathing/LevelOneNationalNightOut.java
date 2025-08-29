@@ -16,10 +16,10 @@ public class LevelOneNationalNightOut extends OpMode {
     private Follower follower;
     private boolean inbounds = true;
 
-    private double x1=-46.25; //inches from origin
-    private double y1=-5; //inches from origin
+    private double x1=-40; //inches from origin
+    private double y1=-2; //inches from origin
     private double x2=16.75; //inches from origin
-    private double y2=67; //inches from origin
+    private double y2=62; //inches from origin
     private boolean inboundsupwards = true;
     private boolean inboundsdownwards = true;
     private boolean inboundsleftwards = true;

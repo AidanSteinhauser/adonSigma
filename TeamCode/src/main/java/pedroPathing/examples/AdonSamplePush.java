@@ -43,7 +43,7 @@ public class AdonSamplePush extends OpMode {
     private final Pose eighthPose = new Pose(136, 125, Math.toRadians(180));
 
     private PathChain action1, action2, action3, action4, action5, action6, action7, action8, action9;
-    private DcMotor slide  = null;
+    private DcMotor slide = null;
 
     public void buildPaths() {
         action1 = follower.pathBuilder()
